@@ -1,3 +1,7 @@
+import classes as cl
+import functions as fn
+
+
 # Main function
 def main():
     print("Program executed")
