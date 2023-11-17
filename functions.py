@@ -72,4 +72,4 @@ def read_from_file(my_data, fxn=None):
                 my_data.auto_import(data_file)
         else:
             with open('sample_data.csv', 'rt', newline='', encoding='utf-8') as data_file:
-                my_data.auto_import(my_data, data_file)
+                my_data.auto_import(data_file)

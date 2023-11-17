@@ -11,7 +11,7 @@ import sys
 
 # Main function
 def main():
-    my_data = cl.master_data
+    my_data = cl.master_data()
 
     fn.read_from_file(my_data)
 

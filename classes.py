@@ -8,21 +8,24 @@ import matplotlib as mp
 import main
 import csv
 
+
 class master_data():
-    collection_dictionary = dict()
     def __init__(self):
-        pass
+        self.collection_dictionary = {}
 
     def __str__(self):
         """
         Method to print all collections.
         """
+        return_string = ''
         counter = 0
         for i in self.collection_dictionary:
             counter += 1
-            print(i, end=' ')
+            return_string += i
+            return_string += ' '
             if counter % 7 == 0:
-                print('\n')
+                return_string += '\n'
+        return return_string
 
     def create_empty_collection(self, name):
         """
@@ -76,7 +79,7 @@ class master_data():
             new_collections[i].data = new_data[i]
 
         for i in new_collections:
-            self.add_collection(self, i)
+            self.add_collection(i)
 
 
 class unit():
