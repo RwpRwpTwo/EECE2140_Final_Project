@@ -9,24 +9,30 @@ import classes as cl
 import main
 
 def collection_portal(my_data):
-    choice = int(input('Import portal:\n\t'
-                       '1. List all connections\n\t'
-                       '2. Create new empty collection\n\t'
-                       '3. Add two collections\n\t'
-                       '4. Subtract two collections\n'))
-    match choice:
-        case 1:
-            print(my_data)
-        case 2:
-            name = input('What would you like the name of the new collection to be?\n')
-            my_data.create_empty_collection(my_data, name)
-            print(my_data.collection_dictionary[name])
-        case 3:
-            add_two_collections(my_data)
-        case 4:
-            subtract_two_collections(my_data)
-        case _:
-            print("That is not a valid input. Try again.")
+
+    loop_break = False
+    while not loop_break:
+        choice = int(input('Collection portal:\n\t'
+                           '1. List all connections\n\t'
+                           '2. Create new empty collection\n\t'
+                           '3. Add two collections\n\t'
+                           '4. Subtract two collections\n\t'
+                           '5. Back to main menu\n'))
+        match choice:
+            case 1:
+                print(my_data)
+            case 2:
+                name = input('What would you like the name of the new collection to be?\n')
+                my_data.create_empty_collection(name)
+                print(my_data.collection_dictionary[name])
+            case 3:
+                add_two_collections(my_data)
+            case 4:
+                subtract_two_collections(my_data)
+            case 5:
+                loop_break = True
+            case _:
+                print("That is not a valid input. Try again.")
 
 
 def import_portal():
@@ -34,12 +40,12 @@ def import_portal():
 
 
 def add_two_collections(my_data):
-    print('What are the names of the two collections you would like to add.'
+    print('What are the names of the two collections you would like to add.\n'
           'Hit enter after inputting the first collection name.'
-          'The sum will be created as a new collection.\n')
+          'The sum \nwill be created as a new collection.\n')
     collection1 = input()
     collection2 = input()
-    new_collection = my_data[collection1] + my_data[collection2]
+    new_collection = my_data.collection_dictionary[collection1] + my_data.collection_dictionary[collection2]
     new_collection_name = input('What would you like the new collection to be named.')
     new_collection.name = new_collection_name
     my_data.add_collection(new_collection)

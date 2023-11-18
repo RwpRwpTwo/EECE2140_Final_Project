@@ -63,10 +63,9 @@ class master_data():
         :return:
         """
         new_collections = []
-        total_errors = 0
-        lines_read = 0
         reader = csv.reader(file, dialect='excel')
         rows = [r for r in reader]
+        rows[0][0].replace('ufeff', '')
         for i in rows[0]:
             new_collections.append(collection(i))
         new_data = [list() for i in range(len(new_collections))]
@@ -91,10 +90,12 @@ class unit():
 
 class collection():
     def __init__(self, name='New Collection', imported_data=[]):
-        name = name.split('(')
-        new_unit = name[1][0]
-        name = name[0].replace(' ', '')
-
+        if [i for i in name if i=='(']:
+            name = name.split('(')
+            new_unit = name[1][0]
+            name = name[0].replace(' ', '')
+        else:
+            new_unit = ''
         self.name = name  # string
         self.collect_unit = unit(new_unit)  # unit class
         self.data = imported_data  # list
@@ -104,15 +105,21 @@ class collection():
         return self.name + ' (' + str(self.collect_unit) + ')'
 
     def __add__(self, other):
+        new_collection_data = []
         if self.length == other.length:
             for i in range(self.length):
-                self.data[i] += other.data[i]
+                new_collection_data.append(self.data[i] + other.data[i])
         else:
             raise Exception('The collections must be the same length.')
 
+        return collection('temp_collection', new_collection_data)
+
     def __sub__(self, other):
+        new_collection_data = []
         if self.length == other.length:
             for i in range(self.length):
-                self.data[i] += other.data[i]
+                new_collection_data.append(self.data[i] - other.data[i])
         else:
             raise Exception('The collections must be the same length.')
+
+        return collection('temp_collection', new_collection_data)
