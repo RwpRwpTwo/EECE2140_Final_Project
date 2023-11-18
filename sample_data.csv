@@ -1,4 +1,4 @@
-﻿current (A),time (s),current error (A)
+﻿current (A),time (s),current_error (A)
 3,0,0.03
 2.714512254,5,0.027145123
 2.456192259,10,0.024561923

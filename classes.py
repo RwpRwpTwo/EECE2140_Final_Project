@@ -17,13 +17,12 @@ class master_data():
         """
         Method to print all collections.
         """
-        return_string = ''
         counter = 0
+        return_string = ''
         for i in self.collection_dictionary:
-            counter += 1
-            return_string += i
-            return_string += ' '
-            if counter % 7 == 0:
+            return_string += str(self.collection_dictionary[i])
+            return_string += '|'
+            if counter % 7 == 1:
                 return_string += '\n'
         return return_string
 
@@ -86,16 +85,23 @@ class unit():
     def __init__(self, str):
         self.representation = str
 
+    def __str__(self):
+        return self.representation
+
 
 class collection():
-    def __init__(self, name='New Collection', construct_unit=unit(''), imported_data=[]):
+    def __init__(self, name='New Collection', imported_data=[]):
+        name = name.split('(')
+        new_unit = name[1][0]
+        name = name[0].replace(' ', '')
+
         self.name = name  # string
-        self.collect_unit = construct_unit  # unit class
+        self.collect_unit = unit(new_unit)  # unit class
         self.data = imported_data  # list
         self.length = len(self.data)  # integer
 
     def __str__(self):
-        return self.name + ' (' + self.collect_unit.representation + ('):\n\t')
+        return self.name + ' (' + str(self.collect_unit) + ')'
 
     def __add__(self, other):
         if self.length == other.length:

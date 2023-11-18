@@ -7,7 +7,6 @@ import csv
 """
 import classes as cl
 import functions as fn
-import sys
 
 # Main function
 def main():
@@ -25,7 +24,6 @@ def main():
             fn.collection_portal(my_data)
         case _:
             print("That is not a valid input. Try again.")
-    print("Program executed")
 
 
 # Function call for main.
