@@ -104,6 +104,17 @@ class collection():
     def __str__(self):
         return self.name + ' (' + str(self.collect_unit) + ')'
 
+    def print_values(self):
+        return_string = ''
+        counter = 0
+        for i in self.data:
+            return_string += i + ' '
+            counter += 1
+            if counter % 5 == 0:
+                return_string += '\n'
+
+        return return_string
+
     def __add__(self, other):
         new_collection_data = []
         if self.length == other.length:

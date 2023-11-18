@@ -14,22 +14,31 @@ def collection_portal(my_data):
     while not loop_break:
         choice = int(input('Collection portal:\n\t'
                            '1. List all connections\n\t'
-                           '2. Create new empty collection\n\t'
-                           '3. Add two collections\n\t'
-                           '4. Subtract two collections\n\t'
-                           '5. Back to main menu\n'))
+                           '2. Print a collection\n\t'
+                           '3. Create new empty collection\n\t'
+                           '4. Add two collections\n\t'
+                           '5. Subtract two collections\n\t'
+                           '6. Back to main menu\n'))
         match choice:
             case 1:
                 print(my_data)
             case 2:
+                print(my_data)
+                name = input("What is the name of the collections who's values you would like to print?\n")
+                referenced_object = my_data.collection_dictionary[name]
+                print(referenced_object)
+                print(referenced_object.print_values())
+            case 3:
                 name = input('What would you like the name of the new collection to be?\n')
                 my_data.create_empty_collection(name)
                 print(my_data.collection_dictionary[name])
-            case 3:
-                add_two_collections(my_data)
             case 4:
-                subtract_two_collections(my_data)
+                print(my_data)
+                add_two_collections(my_data)
             case 5:
+                print(my_data)
+                subtract_two_collections(my_data)
+            case 6:
                 loop_break = True
             case _:
                 print("That is not a valid input. Try again.")
