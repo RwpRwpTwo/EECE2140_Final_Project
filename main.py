@@ -20,7 +20,7 @@ def main():
                                '3. Exit the program\n'))
         match usr_choice:
             case 2:
-                pass
+                fn.import_portal(my_data)
             case 1:
                 fn.collection_portal(my_data)
             case 3:

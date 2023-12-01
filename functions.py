@@ -46,8 +46,14 @@ def collection_portal(my_data):
             print("An error occured, returning to collection menu...")
 
 
-def import_portal():
-    pass
+def import_portal(my_data):
+    """
+    TODO Add ability to import specific columns.
+    :param my_data:
+    :return:
+    """
+    input_file = input("Enter the path to the file.\n")
+    read_from_file(my_data, input_file)
 
 
 def plot_two_collections(my_data):
@@ -84,18 +90,18 @@ def subtract_two_collections(my_data):
     print(new_collection)
 
 
-def read_from_file(my_data, fxn=None):
+def read_from_file(my_data, f='sample_data.csv', fxn=None):
     if fxn != None:
         if len(sys.argv) > 1:
-            with open(sys.argv[1], 'rt', newline='', encoding='utf-8') as data_file:
+            with open(sys.argv[1], 'rt', newline='', encoding='utf-8-sig') as data_file:
                 fxn()
         else:
-            with open('sample_data.csv', 'rt', newline='', encoding='utf-8') as data_file:
+            with open(f, 'rt', newline='', encoding='utf-8-sig') as data_file:
                 fxn()
     else:
         if len(sys.argv) > 1:
-            with open(sys.argv[1], 'rt', newline='', encoding='utf-8') as data_file:
+            with open(sys.argv[1], 'rt', newline='', encoding='utf-8-sig') as data_file:
                 my_data.auto_import(data_file)
         else:
-            with open('sample_data.csv', 'rt', newline='', encoding='utf-8') as data_file:
+            with open(f, 'rt', newline='', encoding='utf-8-sig') as data_file:
                 my_data.auto_import(data_file)

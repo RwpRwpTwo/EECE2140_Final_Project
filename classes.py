@@ -64,11 +64,17 @@ class master_data():
         """
         new_collections = []
         reader = csv.reader(file, dialect='excel')
-        rows = [r for r in reader]
-        rows[0][0].replace('ufeff', '')
+
+        # Corrects bug where "\ufeff" is included
+        rows = [[c.replace('\ufeff', '') for c in row] for row in reader]
+
+        rows = [r for r in rows]
+
         for i in rows[0]:
             new_collections.append(collection(i))
+
         new_data = [list() for i in range(len(new_collections))]
+
         for i in range(1, len(rows)):
             for j in range(len(new_data)):
                 new_data[j].append(rows[i][j])
@@ -81,6 +87,13 @@ class master_data():
 
 
 class unit():
+    prefixes = {'m': 10 ** (-3),
+                'c': 10 ** (-2),
+                'd': 10 ** (-1),
+                'de': 10,
+                'h': 10 ** 2,
+                'k': 10 ** 3}
+
     def __init__(self, str):
         self.representation = str
 
@@ -89,11 +102,30 @@ class unit():
 
 
 class collection():
+    """
+    A collection represents a list of data associated with a string value. In practice,
+    this tends to be one variable being collected. In excel, a collection is defined as
+    a column with a header that describes what the values in that column represent.
+    The header must contain that columns' units in parenthesis after the name.
+    """
+
     def __init__(self, name='New Collection', imported_data=[]):
-        if [i for i in name if i=='(']:
+        """
+        Contructor for the collection class. Filters the header into the name and the unit
+        of the collection. All other data is imported raw and unfiltered. If no name is
+        provided in the function call, wil default the name to 'New Collection' as the
+        dictionary requires a key. If no data is provided, will create an empty list to
+        store potential data.
+        :param name:
+        :param imported_data:
+        """
+
+        # For loop to filter out name and unit
+        if [i for i in name if i == '(']:
             name = name.split('(')
             new_unit = name[1][0]
             name = name[0].replace(' ', '')
+            # name = name.replace('ufeff', '')
         else:
             new_unit = ''
         self.name = name  # string
@@ -102,9 +134,18 @@ class collection():
         self.length = len(self.data)  # integer
 
     def __str__(self):
+        """
+        Function which creates the string representation for the collection class. Only returns
+        the name and the unit. Neglcts the data itself.
+        :return:
+        """
         return self.name + ' (' + str(self.collect_unit) + ')'
 
     def print_values(self):
+        """
+        Method which prints the data of a collection.
+        :return:
+        """
         return_string = ''
         counter = 0
         for i in self.data:
