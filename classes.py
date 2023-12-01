@@ -9,6 +9,9 @@ import main
 import csv
 
 
+# TODO create class which performs and represents regressions
+
+
 class master_data():
     def __init__(self):
         self.collection_dictionary = {}
@@ -79,6 +82,8 @@ class master_data():
             for j in range(len(new_data)):
                 new_data[j].append(rows[i][j])
 
+        new_data = [[float(j) for j in i] for i in new_data]
+
         for i in range(len(new_collections)):
             new_collections[i].data = new_data[i]
 
@@ -129,8 +134,11 @@ class collection():
         else:
             new_unit = ''
         self.name = name  # string
+
         self.collect_unit = unit(new_unit)  # unit class
-        self.data = imported_data  # list
+
+        self.data = imported_data # list
+
         self.length = len(self.data)  # integer
 
     def __str__(self):

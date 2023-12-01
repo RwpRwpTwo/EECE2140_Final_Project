@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from decimal import *
+import numpy as np
 import sys
 import classes as cl
 import main
@@ -58,9 +60,16 @@ def import_portal(my_data):
 
 def plot_two_collections(my_data):
     cl1 = input('What is the name of the collection you would like on the x axis?\n')
+    x = my_data.collection_dictionary[cl1].data
     cl2 = input('What is the name of the collection you would like on the y axis?\n')
+    y = my_data.collection_dictionary[cl2].data
+
     fig, my_plot = plt.subplots()
-    my_plot.plot(my_data.collection_dictionary[cl1].data, my_data.collection_dictionary[cl2].data)
+
+    my_plot.plot(x, y)
+
+    my_plot.set_xticks(np.arange(x[0], x[-1], x[-1] / 10))
+    my_plot.set_yticks(np.arange(y[0], y[-1], -(y[-1] / 10)))
     plt.show()
 
 
