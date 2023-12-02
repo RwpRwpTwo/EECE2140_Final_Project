@@ -5,8 +5,10 @@ import scipy as sp
 import sympy as smp
 import matplotlib as mp
 """
-import main
 import csv
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
 
 
 # TODO create class which performs and represents regressions
@@ -109,12 +111,12 @@ class Unit:
 class Collection:
     """
     A collection represents a list of data associated with a string value. In practice,
-    this tends to be one variable being collected. In excel, a collection is defined as
+    this tends to be one variable being collected. In Excel, a collection is defined as
     a column with a header that describes what the values in that column represent.
-    The header must contain that columns' units in parenthesis after the name.
+    The header must contain that columns' units in parentheses after the name.
     """
 
-    def __init__(self, name='New Collection', imported_data=[]):
+    def __init__(self, name='New Collection', imported_data=None):
         """
         Constructor for the collection class. Filters the header into the name and the unit
         of the collection. All other data is imported raw and unfiltered. If no name is
@@ -124,6 +126,8 @@ class Collection:
         :param name:
         :param imported_data:
         """
+        if imported_data is None:
+            imported_data = []
 
         # For loop to filter out name and unit
         if [i for i in name if i == '(']:
@@ -137,7 +141,7 @@ class Collection:
 
         self.collect_unit = Unit(new_unit)  # unit class
 
-        self.data = imported_data # list
+        self.data = imported_data  # list
 
         self.length = len(self.data)  # integer
 
@@ -185,26 +189,110 @@ class Collection:
         return Collection('temp_collection', new_collection_data)
 
 
-class Regression:
+class CartPlot:
 
-    def __init__(self):
-        pass
+    def __init__(self, cl1=Collection(), cl2=Collection()):
+        self.cl1 = cl1  # Independent variable collection
+        self.x = self.cl1.data
+        self.x_axis_name = str(self.cl1)
+
+        self.cl2 = cl2  # Dependant variable collection
+        self.y = self.cl2.data
+        self.y_axis_name = str(self.cl2)
+        self.name = self.cl2.name + ' vs ' + self.cl1.name
 
     def __str__(self):
-        pass
+        return self.name
 
-class LinReg(Regression):
+    def default_plot(self):
+        fig, my_plot = plt.subplots()
 
-    def __init__(self):
-        pass
+        my_plot.scatter(self.x, self.y)
+
+        my_plot.set_xticks(np.arange(self.x[0], self.x[-1], self.x[-1] / 10))
+        my_plot.set_yticks(np.arange(self.y[0], self.y[-1], self.y[-1] / 10))
+        plt.show()
+
+    def swap_axis(self):
+        temp_collection = self.cl1
+        self.cl1 = self.cl2
+        self.cl2 = temp_collection
+        # TODO make it so that the class reconstructs with the new collections
+        print("Swapped the axis.")
+
+
+class LinReg(CartPlot):
+
+    def __init__(self, cl1, cl2, L=0.0001, iter=1000):
+        super().__init__(cl1, cl2)
+        self.L = L
+        self.iter = iter
+
+        self.m = 0.0
+        self.b = 0.0
+        self.r = 0.0
+        self.p = 0.0
+        self.std_err = 0.0
+
+        self.n = len(cl1.data)
 
     def __str__(self):
-        pass
+        return_string = ''
+        return_string += 'y = ' + str(self.m) + 'x + ' + str(self.b)
+        return_string += '\nR: ' + str(self.r) + '\tP: ' + str(self.p) + '\tStandard Error: ' + str(self.std_err)
+        return return_string
 
-class ExpReg(Regression):
+    def func(self, x):
+        return self.m * x + self.b
+
+    def default_plot(self, y=None):
+        if y is None:
+            y = self.y
+        fig, my_plot = plt.subplots()
+
+        y_max = max(y[-1], self.y[-1])
+        y_min = min(y[0], self.y[0])
+
+        my_plot.scatter(self.x, self.y, color='#3d405b')
+        my_plot.plot(self.x, y, color='#e07a5f')
+
+        my_plot.set_title(self.name)
+        my_plot.grid()
+        my_plot.set_xlabel(self.x_axis_name)
+        my_plot.set_ylabel(self.y_axis_name)
+        my_plot.set_xticks(np.arange(self.x[0], self.x[-1], self.x[-1] / 10))
+        my_plot.set_yticks(np.arange(y_min, y_max, y_max / 10))
+        plt.show()
+
+    def calc_reg(self):
+        """
+        for i in range(self.iter):
+            if i % 100 == 0:
+                print("Iteration: ", i)
+            self.gradient_descent()
+        :return:
+        """
+        self.m, self.b, self.r, self.p, self.std_err = stats.linregress(self.x, self.y)
+        self.default_plot([self.func(i) for i in self.x])
+        print(self)
+
+    def gradient_descent(self):
+        m_grad = 0
+        b_grad = 0
+        for i in range(self.n):
+            x = self.x[i]
+            y = self.y[i]
+            m_grad += -(2 / self.n) * x * (y - (self.m * x + self.b))
+            b_grad += -(2 / self.n) * (y - (self.m * x + self.b))
+
+        self.m = self.m - m_grad * self.L
+        self.b = self.b - b_grad * self.L
+
+
+class ExpReg(CartPlot):
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def __str__(self):
         pass

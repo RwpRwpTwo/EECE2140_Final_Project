@@ -3,7 +3,6 @@ from decimal import *
 import numpy as np
 import sys
 import classes as cl
-import main
 
 
 def collection_portal(my_data):
@@ -13,10 +12,9 @@ def collection_portal(my_data):
                            '1. List all connections\n\t'
                            '2. Print a collection\n\t'
                            '3. Create new empty collection\n\t'
-                           '4. Plot two collections\n\t'
-                           '5. Add two collections\n\t'
-                           '6. Subtract two collections\n\t'
-                           '7. Back to main menu\n'))
+                           '4. Add two collections\n\t'
+                           '5. Subtract two collections\n\t'
+                           '6. Back to main menu\n'))
         try:
             match choice:
                 case 1:
@@ -33,19 +31,55 @@ def collection_portal(my_data):
                     print(my_data.collection_dictionary[name])
                 case 4:
                     print(my_data)
-                    plot_two_collections(my_data)
+                    add_two_collections(my_data)
                 case 5:
                     print(my_data)
-                    add_two_collections(my_data)
-                case 6:
-                    print(my_data)
                     subtract_two_collections(my_data)
-                case 7:
+                case 6:
                     loop_break = True
                 case _:
                     print("That is not a valid input. Try again.")
-        except:
-            print("An error occured, returning to collection menu...")
+        except KeyError:
+            print("Thay is an invalid collection name, returning to collection menu...")
+        except Exception as v:
+            print(v)
+            print("An error occurred, returning to collection menu...")
+
+
+def plotting_portal(my_data):
+    loop_break = False
+    while not loop_break:
+        choice = int(input('Collection portal:\n\t'
+                           '1. Plot two collections\n\t'
+                           '2. Perform linear regression\n\t'
+                           '3. Back to main menu\n'))
+        try:
+            match choice:
+                case 1:
+                    print(my_data)
+                    # n1 = input("Enter the name of the independant variable collection.\n")
+                    # n2 = input("Enter the name of the dependant variable collection\n")
+                    n1 = 'independant'
+                    n2 = 'dependant'
+
+
+                    p = cl.CartPlot(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
+                    p.default_plot()
+                    # TODO implement call for plotting
+                case 2:
+                    n1 = 'independant'
+                    n2 = 'exp_dependant'
+                    r = cl.LinReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
+                    r.calc_reg()
+                case 3:
+                    loop_break = True
+                case _:
+                    print("That is not a valid input. Try again.")
+        except KeyError:
+            print("That is an invalid collection name, returning to plotting menu...")
+        except Exception as v:
+            print(v)
+            print("An error occurred, returning to plotting menu...")
 
 
 def import_portal(my_data):
@@ -56,21 +90,6 @@ def import_portal(my_data):
     """
     input_file = input("Enter the path to the file.\n")
     read_from_file(my_data, input_file)
-
-
-def plot_two_collections(my_data):
-    cl1 = input('What is the name of the collection you would like on the x axis?\n')
-    x = my_data.collection_dictionary[cl1].data
-    cl2 = input('What is the name of the collection you would like on the y axis?\n')
-    y = my_data.collection_dictionary[cl2].data
-
-    fig, my_plot = plt.subplots()
-
-    my_plot.plot(x, y)
-
-    my_plot.set_xticks(np.arange(x[0], x[-1], x[-1] / 10))
-    my_plot.set_yticks(np.arange(y[0], y[-1], -(y[-1] / 10)))
-    plt.show()
 
 
 def add_two_collections(my_data):
