@@ -12,7 +12,7 @@ import csv
 # TODO create class which performs and represents regressions
 
 
-class master_data():
+class MasterData:
     def __init__(self):
         self.collection_dictionary = {}
 
@@ -35,7 +35,7 @@ class master_data():
         :param name:
         :return:
         """
-        new_collection = collection(name)
+        new_collection = Collection(name)
         self.collection_dictionary[name] = new_collection
 
     def add_collection(self, new_collection):
@@ -74,7 +74,7 @@ class master_data():
         rows = [r for r in rows]
 
         for i in rows[0]:
-            new_collections.append(collection(i))
+            new_collections.append(Collection(i))
 
         new_data = [list() for i in range(len(new_collections))]
 
@@ -91,7 +91,7 @@ class master_data():
             self.add_collection(i)
 
 
-class unit():
+class Unit:
     prefixes = {'m': 10 ** (-3),
                 'c': 10 ** (-2),
                 'd': 10 ** (-1),
@@ -106,7 +106,7 @@ class unit():
         return self.representation
 
 
-class collection():
+class Collection:
     """
     A collection represents a list of data associated with a string value. In practice,
     this tends to be one variable being collected. In excel, a collection is defined as
@@ -116,7 +116,7 @@ class collection():
 
     def __init__(self, name='New Collection', imported_data=[]):
         """
-        Contructor for the collection class. Filters the header into the name and the unit
+        Constructor for the collection class. Filters the header into the name and the unit
         of the collection. All other data is imported raw and unfiltered. If no name is
         provided in the function call, wil default the name to 'New Collection' as the
         dictionary requires a key. If no data is provided, will create an empty list to
@@ -135,7 +135,7 @@ class collection():
             new_unit = ''
         self.name = name  # string
 
-        self.collect_unit = unit(new_unit)  # unit class
+        self.collect_unit = Unit(new_unit)  # unit class
 
         self.data = imported_data # list
 
@@ -172,7 +172,7 @@ class collection():
         else:
             raise Exception('The collections must be the same length.')
 
-        return collection('temp_collection', new_collection_data)
+        return Collection('temp_collection', new_collection_data)
 
     def __sub__(self, other):
         new_collection_data = []
@@ -182,4 +182,29 @@ class collection():
         else:
             raise Exception('The collections must be the same length.')
 
-        return collection('temp_collection', new_collection_data)
+        return Collection('temp_collection', new_collection_data)
+
+
+class Regression:
+
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        pass
+
+class LinReg(Regression):
+
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        pass
+
+class ExpReg(Regression):
+
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        pass
