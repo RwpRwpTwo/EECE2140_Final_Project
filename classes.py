@@ -1,17 +1,11 @@
-"""
-import functions as fn
-import numpy as np
-import scipy as sp
-import sympy as smp
-import matplotlib as mp
-"""
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+import math as m
 
 
-# TODO create class which performs and represents regressions
+# TODO create class which performs and represents exponential regressions
 
 
 class MasterData:
@@ -229,7 +223,9 @@ class LinReg(CartPlot):
         self.iter = iter
 
         self.m = 0.0
+        self.m_err = 0.0
         self.b = 0.0
+        self.b_err = 0.0
         self.r = 0.0
         self.p = 0.0
         self.std_err = 0.0
@@ -238,7 +234,12 @@ class LinReg(CartPlot):
 
     def __str__(self):
         return_string = ''
-        return_string += 'y = ' + str(self.m) + 'x + ' + str(self.b)
+        if self.b >= 0:
+            return_string += 'y = (' + str(self.m) + u"\u00B1" + str(self.m_err) + ')x + (' + str(
+                self.b) + u"\u00B1" + str(self.b_err) + ')'
+        else:
+            return_string += 'y = (' + str(self.m) + u"\u00B1" + str(self.m_err) + ')x - (' + str(
+                -self.b) + u"\u00B1" + str(self.b_err) + ')'
         return_string += '\nR: ' + str(self.r) + '\tP: ' + str(self.p) + '\tStandard Error: ' + str(self.std_err)
         return return_string
 
@@ -273,6 +274,15 @@ class LinReg(CartPlot):
         :return:
         """
         self.m, self.b, self.r, self.p, self.std_err = stats.linregress(self.x, self.y)
+
+        # Applying equation for error from paper
+        s = m.sqrt(sum([(self.y[i] - self.m * self.x[i] - self.b) ** 2 for i in range(self.n)]) / (self.n - 2))
+        self.m_err = s * m.sqrt(self.n / ((self.n * sum([self.x[i] ** 2 for i in range(self.n)])) - (
+                sum([self.x[i] for i in range(self.n)]) ** 2)))
+        self.b_err = s * m.sqrt(sum([self.x[i] ** 2 for i in range(self.n)]) / (
+                (self.n * sum([self.x[i] ** 2 for i in range(self.n)])) - (
+                sum([self.x[i] for i in range(self.n)]) ** 2)))
+
         self.default_plot([self.func(i) for i in self.x])
         print(self)
 
@@ -289,10 +299,64 @@ class LinReg(CartPlot):
         self.b = self.b - b_grad * self.L
 
 
-class ExpReg(CartPlot):
+class ExpReg(LinReg):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, cl1, cl2):
+        super().__init__(cl1, cl2)
+
+        self.lny = [m.log(i) for i in self.y]
 
     def __str__(self):
-        pass
+        return_string = ''
+        return_string += 'y = (' + str(self.b) + u"\u00B1" + str(self.b_err) + ') * e^(('
+        return_string += str(self.m) + u"\u00B1" + str(self.m_err) + ')x)\n'
+        return return_string
+
+    def func(self, x):
+        return self.b * m.exp(self.m * x)
+
+    def default_plot(self, y=None):
+        if y is None:
+            y = self.y
+        """
+        plt.rcParams.update({
+            "text.usetex": True,
+            "font.family": "Helvetica"
+        })
+        """
+
+        fig, my_plot = plt.subplots()
+
+        y_max = max(y[-1], self.y[-1])
+        y_min = min(y[0], self.y[0])
+
+        my_plot.scatter(self.x, self.y, color='#3d405b')
+        my_plot.plot(self.x, y, color='#e07a5f')
+
+        my_plot.set_title(self.name)
+        my_plot.grid()
+        my_plot.set_xlabel(self.x_axis_name)
+        my_plot.set_ylabel(self.y_axis_name)
+        my_plot.set_xticks(np.arange(self.x[0], self.x[-1], self.x[-1] / 10))
+        my_plot.set_yticks(np.arange(y_min, y_max, y_max / 10))
+
+        #my_plot[1].plot()
+        #my_plot[1].text(x=0.5, y=0.5, s=str(self))
+        plt.show()
+
+    def calc_reg(self):
+        self.m, self.b, self.r, self.p, self.std_err = stats.linregress(self.x, self.lny)
+
+        # Applying equation for error from paper
+        s = m.sqrt(sum([(self.lny[i] - self.m * self.x[i] - self.b) ** 2 for i in range(self.n)]) / (self.n - 2))
+        self.m_err = s * m.sqrt(self.n / ((self.n * sum([self.x[i] ** 2 for i in range(self.n)])) - (
+                sum([self.x[i] for i in range(self.n)]) ** 2)))
+        self.b_err = s * m.sqrt(sum([self.x[i] ** 2 for i in range(self.n)]) / (
+                (self.n * sum([self.x[i] ** 2 for i in range(self.n)])) - (
+                sum([self.x[i] for i in range(self.n)]) ** 2)))
+
+        self.b = m.exp(self.b)
+        self.b_err = m.exp(self.b_err)
+
+        self.default_plot([self.func(i) for i in self.x])
+        print(self)

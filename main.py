@@ -1,11 +1,6 @@
-"""
-import numpy as np
-import scipy as sp
-import sympy as smp
-import matplotlib as mp
-"""
 import classes as cl
 import functions as fn
+
 
 # Main function
 def main():

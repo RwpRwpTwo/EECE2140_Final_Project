@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-from decimal import *
-import numpy as np
 import sys
 import classes as cl
 
@@ -52,7 +49,8 @@ def plotting_portal(my_data):
         choice = int(input('Collection portal:\n\t'
                            '1. Plot two collections\n\t'
                            '2. Perform linear regression\n\t'
-                           '3. Back to main menu\n'))
+                           '3. Perform exponential regression\n\t'
+                           '4. Back to main menu\n'))
         try:
             match choice:
                 case 1:
@@ -65,13 +63,18 @@ def plotting_portal(my_data):
 
                     p = cl.CartPlot(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     p.default_plot()
-                    # TODO implement call for plotting
                 case 2:
                     n1 = 'independant'
                     n2 = 'exp_dependant'
                     r = cl.LinReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     r.calc_reg()
                 case 3:
+                    n1 = 'independant'
+                    n2 = 'exp_dependant'
+                    expr = cl.ExpReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
+                    expr.calc_reg()
+
+                case 4:
                     loop_break = True
                 case _:
                     print("That is not a valid input. Try again.")
@@ -118,7 +121,7 @@ def subtract_two_collections(my_data):
     print(new_collection)
 
 
-def read_from_file(my_data, f='sample_data.csv', fxn=None):
+def read_from_file(my_data, f='data/sample_data.csv', fxn=None):
     if fxn != None:
         if len(sys.argv) > 1:
             with open(sys.argv[1], 'rt', newline='', encoding='utf-8-sig') as data_file:
