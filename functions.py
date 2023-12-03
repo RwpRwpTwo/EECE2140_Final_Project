@@ -1,6 +1,6 @@
 import sys
 import classes as cl
-
+import math as m
 
 def collection_portal(my_data):
     loop_break = False
@@ -55,22 +55,29 @@ def plotting_portal(my_data):
             match choice:
                 case 1:
                     print(my_data)
-                    # n1 = input("Enter the name of the independant variable collection.\n")
-                    # n2 = input("Enter the name of the dependant variable collection\n")
                     n1 = 'independant'
                     n2 = 'dependant'
+                    n1 = input("Enter the name of the independant variable collection.\n")
+                    n2 = input("Enter the name of the dependant variable collection\n")
+
 
 
                     p = cl.CartPlot(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     p.default_plot()
                 case 2:
+                    print(my_data)
                     n1 = 'independant'
-                    n2 = 'exp_dependant'
+                    n2 = 'dependant'
+                    n1 = input("Enter the name of the independant variable collection.\n")
+                    n2 = input("Enter the name of the dependant variable collection\n")
                     r = cl.LinReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     r.calc_reg()
                 case 3:
+                    print(my_data)
                     n1 = 'independant'
-                    n2 = 'exp_dependant'
+                    n2 = 'dependant'
+                    n1 = input("Enter the name of the independant variable collection.\n")
+                    n2 = input("Enter the name of the dependant variable collection\n")
                     expr = cl.ExpReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     expr.calc_reg()
 
@@ -136,3 +143,11 @@ def read_from_file(my_data, f='data/sample_data.csv', fxn=None):
         else:
             with open(f, 'rt', newline='', encoding='utf-8-sig') as data_file:
                 my_data.auto_import(data_file)
+
+def round_sig(x, sig=4):
+    try:
+        return round(x, sig - int(m.floor(m.log10(abs(x)))) - 1)
+    except Exception as v:
+        print(x, " could not be converted due to ", v, ".")
+        return x
+

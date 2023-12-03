@@ -6,7 +6,7 @@ import functions as fn
 def main():
     my_data = cl.MasterData()
 
-    fn.read_from_file(my_data)
+    fn.read_from_file(my_data, f='data/sample_data_from_lab.csv')
     loop_break = False
     while not loop_break:
         usr_choice = int(input('What would you like to do?\n\t'
@@ -21,7 +21,6 @@ def main():
                 fn.plotting_portal(my_data)
             case 3:
                 fn.import_portal(my_data)
-
             case 4:
                 loop_break = True
             case _:

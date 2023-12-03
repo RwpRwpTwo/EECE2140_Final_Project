@@ -3,10 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 import math as m
-
-
-# TODO create class which performs and represents exponential regressions
-
+import functions as fn
+# TODO make it so that outputted numbers are rounded.
 
 class MasterData:
     def __init__(self):
@@ -88,6 +86,8 @@ class MasterData:
 
 
 class Unit:
+    # TODO add method to convert data to SI automatically
+
     prefixes = {'m': 10 ** (-3),
                 'c': 10 ** (-2),
                 'd': 10 ** (-1),
@@ -219,8 +219,8 @@ class LinReg(CartPlot):
 
     def __init__(self, cl1, cl2, L=0.0001, iter=1000):
         super().__init__(cl1, cl2)
-        self.L = L
-        self.iter = iter
+        # self.L = L
+        # self.iter = iter
 
         self.m = 0.0
         self.m_err = 0.0
@@ -246,23 +246,46 @@ class LinReg(CartPlot):
     def func(self, x):
         return self.m * x + self.b
 
+    def lower_func(self, x):
+        return (self.m - self.m_err) * x + (self.b - self.b_err)
+    def upper_func(self, x):
+        return (self.m + self.m_err) * x + (self.b + self.b_err)
+
+
+    def round_all(self, f=4):
+        # TODO Move round all to collection class for self.x and self.y
+        self.x = [fn.round_sig(i, f) for i in self.x]
+        self.y = [fn.round_sig(i, f) for i in self.y]
+
+        self.m = fn.round_sig(self.m, f)
+        self.m_err = fn.round_sig(self.m_err, f)
+        self.b = fn.round_sig(self.b, f)
+        self.b_err = fn.round_sig(self.b_err, f)
+        self.r = fn.round_sig(self.r, f)
+        self.p = fn.round_sig(self.p, f)
+        self.std_err = fn.round_sig(self.std_err, f)
+
     def default_plot(self, y=None):
         if y is None:
             y = self.y
         fig, my_plot = plt.subplots()
 
-        y_max = max(y[-1], self.y[-1])
-        y_min = min(y[0], self.y[0])
+        y_max = max(max(y), max(self.y))
+        y_min = min(min(y), min(self.y))
 
         my_plot.scatter(self.x, self.y, color='#3d405b')
         my_plot.plot(self.x, y, color='#e07a5f')
+
+        if (self.m != 0) and (self.b != 0):
+            my_plot.plot(self.x, [self.lower_func(i) for i in self.x], ls=':')
+            my_plot.plot(self.x, [self.upper_func(i) for i in self.x], ls=':')
 
         my_plot.set_title(self.name)
         my_plot.grid()
         my_plot.set_xlabel(self.x_axis_name)
         my_plot.set_ylabel(self.y_axis_name)
-        my_plot.set_xticks(np.arange(self.x[0], self.x[-1], self.x[-1] / 10))
-        my_plot.set_yticks(np.arange(y_min, y_max, y_max / 10))
+        my_plot.set_xticks(np.arange(self.x[0], self.x[-1] + (self.x[-1] / 10), self.x[-1] / 10))
+        my_plot.set_yticks(np.arange(y_min, y_max + (y_max / 10), y_max / 10))
         plt.show()
 
     def calc_reg(self):
@@ -283,10 +306,12 @@ class LinReg(CartPlot):
                 (self.n * sum([self.x[i] ** 2 for i in range(self.n)])) - (
                 sum([self.x[i] for i in range(self.n)]) ** 2)))
 
+        self.round_all()
         self.default_plot([self.func(i) for i in self.x])
         print(self)
 
     def gradient_descent(self):
+        # Currently unused
         m_grad = 0
         b_grad = 0
         for i in range(self.n):
@@ -307,41 +332,48 @@ class ExpReg(LinReg):
         self.lny = [m.log(i) for i in self.y]
 
     def __str__(self):
+        str_b = fn.round_sig(self.b, 3)
+        str_b_err = fn.round_sig(self.b_err, 3)
+        str_m = fn.round_sig(self.m, 3)
+        str_m_err = fn.round_sig(self.m_err, 3)
         return_string = ''
-        return_string += 'y = (' + str(self.b) + u"\u00B1" + str(self.b_err) + ') * e^(('
-        return_string += str(self.m) + u"\u00B1" + str(self.m_err) + ')x)\n'
+        return_string += 'y = (' + str(str_b) + u"\u00B1" + str(str_b_err) + ') * e^(('
+        return_string += str(str_m) + u"\u00B1" + str(str_m_err) + ')x)\n'
+        return_string += '\nR: ' + str(self.r) + '\tP: ' + str(self.p) + '\tStandard Error: ' + str(self.std_err)
         return return_string
 
     def func(self, x):
         return self.b * m.exp(self.m * x)
 
+    def lower_func(self, x):
+        return (self.b -  self.b_err) * m.exp((self.m - self.m_err) * x)
+
+    def upper_func(self, x):
+        return (self.b + self.b_err) * m.exp((self.m + self.m_err) * x)
+
     def default_plot(self, y=None):
         if y is None:
             y = self.y
-        """
-        plt.rcParams.update({
-            "text.usetex": True,
-            "font.family": "Helvetica"
-        })
-        """
 
         fig, my_plot = plt.subplots()
 
-        y_max = max(y[-1], self.y[-1])
-        y_min = min(y[0], self.y[0])
+        y_max = max(max(y), max(self.y))
+        y_min = min(min(y), min(self.y))
 
         my_plot.scatter(self.x, self.y, color='#3d405b')
         my_plot.plot(self.x, y, color='#e07a5f')
+
+        if (self.m != 0) and (self.b != 0):
+            my_plot.plot(self.x, [self.lower_func(i) for i in self.x], ls=':')
+            my_plot.plot(self.x, [self.upper_func(i) for i in self.x], ls=':')
 
         my_plot.set_title(self.name)
         my_plot.grid()
         my_plot.set_xlabel(self.x_axis_name)
         my_plot.set_ylabel(self.y_axis_name)
-        my_plot.set_xticks(np.arange(self.x[0], self.x[-1], self.x[-1] / 10))
-        my_plot.set_yticks(np.arange(y_min, y_max, y_max / 10))
+        my_plot.set_xticks(np.arange(self.x[0], self.x[-1] + (self.x[-1] / 10), self.x[-1] / 10))
+        my_plot.set_yticks(np.arange(y_min, y_max + (y_max / 10), y_max / 10))
 
-        #my_plot[1].plot()
-        #my_plot[1].text(x=0.5, y=0.5, s=str(self))
         plt.show()
 
     def calc_reg(self):
@@ -358,5 +390,6 @@ class ExpReg(LinReg):
         self.b = m.exp(self.b)
         self.b_err = m.exp(self.b_err)
 
+        self.round_all()
         self.default_plot([self.func(i) for i in self.x])
         print(self)
