@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 import math as m
 import functions as fn
-# TODO make it so that outputted numbers are rounded.
+
 
 class MasterData:
     def __init__(self):
@@ -232,6 +232,10 @@ class LinReg(CartPlot):
 
         self.n = len(cl1.data)
 
+        self.usr_m = 0.0
+        self.usr_b = 0.0
+        self.MSE = 0.0
+
     def __str__(self):
         return_string = ''
         if self.b >= 0:
@@ -248,9 +252,9 @@ class LinReg(CartPlot):
 
     def lower_func(self, x):
         return (self.m - self.m_err) * x + (self.b - self.b_err)
+
     def upper_func(self, x):
         return (self.m + self.m_err) * x + (self.b + self.b_err)
-
 
     def round_all(self, f=4):
         # TODO Move round all to collection class for self.x and self.y
@@ -288,14 +292,15 @@ class LinReg(CartPlot):
         my_plot.set_yticks(np.arange(y_min, y_max + (y_max / 10), y_max / 10))
         plt.show()
 
+    def usr_reg(self):
+        print("y = mx+b")
+        self.usr_m = input("Input the expected m.\n")
+        self.usr_b = input("Input the expected b.\n")
+
+    def usr_func(self, x):
+        return self.m * x + self.b
+
     def calc_reg(self):
-        """
-        for i in range(self.iter):
-            if i % 100 == 0:
-                print("Iteration: ", i)
-            self.gradient_descent()
-        :return:
-        """
         self.m, self.b, self.r, self.p, self.std_err = stats.linregress(self.x, self.y)
 
         # Applying equation for error from paper
@@ -310,18 +315,21 @@ class LinReg(CartPlot):
         self.default_plot([self.func(i) for i in self.x])
         print(self)
 
-    def gradient_descent(self):
-        # Currently unused
-        m_grad = 0
-        b_grad = 0
+    def MSE_to_usr_def(self):
+        """
+        For each value:
+        1. Check if within error of regression
+        2a. If within, skip
+        2b. if not within, return minimum of the difference to each error line
+        :return:
+        """
+        self.MSE = 0.0
         for i in range(self.n):
-            x = self.x[i]
-            y = self.y[i]
-            m_grad += -(2 / self.n) * x * (y - (self.m * x + self.b))
-            b_grad += -(2 / self.n) * (y - (self.m * x + self.b))
-
-        self.m = self.m - m_grad * self.L
-        self.b = self.b - b_grad * self.L
+            up = self.upper_func(self.x[i])
+            low = self.lower_func(self.x[i])
+            curr_point = self.usr_func(self.x[i])
+            if not (low <= curr_point <= up):
+                self.MSE += (min(abs(curr_point - up), abs(curr_point - low))) ** 2
 
 
 class ExpReg(LinReg):
@@ -330,6 +338,7 @@ class ExpReg(LinReg):
         super().__init__(cl1, cl2)
 
         self.lny = [m.log(i) for i in self.y]
+        self.user_reg = False
 
     def __str__(self):
         str_b = fn.round_sig(self.b, 3)
@@ -346,27 +355,41 @@ class ExpReg(LinReg):
         return self.b * m.exp(self.m * x)
 
     def lower_func(self, x):
-        return (self.b -  self.b_err) * m.exp((self.m - self.m_err) * x)
+        return (self.b - self.b_err) * m.exp((self.m - self.m_err) * x)
 
     def upper_func(self, x):
         return (self.b + self.b_err) * m.exp((self.m + self.m_err) * x)
 
-    def default_plot(self, y=None):
-        if y is None:
-            y = self.y
+    def usr_reg(self):
+        print("y = B*e^(A*x)")
+        self.usr_m = float(input("Input the expected A.\n"))
+        self.usr_b = float(input("Input the expected B.\n"))
+        self.user_reg = True
 
+    def usr_func(self, x):
+        return self.usr_b * m.exp(self.usr_m * x)
+
+    def default_plot(self):
+        upper_y = [self.upper_func(i) for i in self.x]
+        lower_y = [self.lower_func(i) for i in self.x]
+        user_y = [self.usr_func(i) for i in self.x]
+        y = [self.func(i) for i in self.x]
         fig, my_plot = plt.subplots()
 
-        y_max = max(max(y), max(self.y))
-        y_min = min(min(y), min(self.y))
+        y_max = max(max(self.y), max(user_y), max(upper_y), max(y))
+        y_min = min(min(self.y), min(user_y), min(lower_y), min(y))
 
-        my_plot.scatter(self.x, self.y, color='#3d405b')
-        my_plot.plot(self.x, y, color='#e07a5f')
+        original_data = my_plot.scatter(self.x, self.y, color='#3d405b', label='Original data')
+        regression = my_plot.plot(self.x, y, color='#e07a5f', label='Regression')
 
         if (self.m != 0) and (self.b != 0):
-            my_plot.plot(self.x, [self.lower_func(i) for i in self.x], ls=':')
-            my_plot.plot(self.x, [self.upper_func(i) for i in self.x], ls=':')
+            lower = my_plot.plot(self.x, lower_y, ls=':', color='#e07a5f', label='Lower Bound')
+            upper = my_plot.plot(self.x, upper_y, ls=':', color='#e07a5f', label='Upper Bound')
 
+        if self.user_reg == True:
+            expected = my_plot.plot(self.x, user_y, color='#81b29a', label='User defined regression')
+
+        #my_plot.legend(loc='outside lower center')
         my_plot.set_title(self.name)
         my_plot.grid()
         my_plot.set_xlabel(self.x_axis_name)
@@ -391,5 +414,22 @@ class ExpReg(LinReg):
         self.b_err = m.exp(self.b_err)
 
         self.round_all()
-        self.default_plot([self.func(i) for i in self.x])
         print(self)
+
+    def MSE_to_usr_def(self):
+        """
+        For each value:
+        1. Check if within error of regression
+        2a. If within, skip
+        2b. if not within, return minimum of the difference to each error line
+        :return:
+        """
+        self.MSE = 0.0
+        for i in range(self.n):
+            up = self.upper_func(self.x[i])
+            low = self.lower_func(self.x[i])
+            curr_point = self.usr_func(self.x[i])
+            if not ((low <= curr_point) and (curr_point <= up)):
+                self.MSE += (min(abs(curr_point - up), abs(curr_point - low))) ** 2
+
+        print("Mean Squared Error:", self.MSE)

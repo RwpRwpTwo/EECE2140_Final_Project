@@ -55,31 +55,35 @@ def plotting_portal(my_data):
             match choice:
                 case 1:
                     print(my_data)
-                    n1 = 'independant'
-                    n2 = 'dependant'
                     n1 = input("Enter the name of the independant variable collection.\n")
                     n2 = input("Enter the name of the dependant variable collection\n")
-
-
-
                     p = cl.CartPlot(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
+
                     p.default_plot()
                 case 2:
                     print(my_data)
-                    n1 = 'independant'
-                    n2 = 'dependant'
                     n1 = input("Enter the name of the independant variable collection.\n")
                     n2 = input("Enter the name of the dependant variable collection\n")
                     r = cl.LinReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     r.calc_reg()
+
+
+
                 case 3:
                     print(my_data)
-                    n1 = 'independant'
-                    n2 = 'dependant'
                     n1 = input("Enter the name of the independant variable collection.\n")
                     n2 = input("Enter the name of the dependant variable collection\n")
                     expr = cl.ExpReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     expr.calc_reg()
+
+                    choice = input("Would you like to input expected values for a regression?\n"
+                                   "For yes type 'yes'. For no type anything.")
+
+                    if choice == 'yes':
+                        expr.usr_reg()
+                        expr.MSE_to_usr_def()
+
+                    expr.default_plot()
 
                 case 4:
                     loop_break = True
