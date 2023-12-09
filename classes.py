@@ -7,13 +7,16 @@ import functions as fn
 
 
 class MasterData:
+    """
+    A class which stores collections. It consists of one dictionary who's keys
+    are the headers to each collection and whos values are the collection objects.
+    """
+
     def __init__(self):
         self.collection_dictionary = {}
 
     def __str__(self):
-        """
-        Method to print all collections.
-        """
+        # Prints the headers of each collection.
         counter = 0
         return_string = ''
         for i in self.collection_dictionary:
@@ -26,8 +29,8 @@ class MasterData:
     def create_empty_collection(self, name):
         """
         Creates a new collection which contains no data.
-        :param name:
-        :return:
+        :param name: The name of the collection being made.
+        :return: Creates new empty collection and returns nothing.
         """
         new_collection = Collection(name)
         self.collection_dictionary[name] = new_collection
@@ -35,8 +38,8 @@ class MasterData:
     def add_collection(self, new_collection):
         """
         Adds a collection to the master collection dictionary.
-        :param new_collection:
-        :return success or error message:
+        :param new_collection: A collection object.
+        :return void: The new collection is added to the dictionary.
         """
         self.collection_dictionary[new_collection.name] = new_collection
         return 'Collection' + new_collection.name + 'added successfully'
@@ -47,6 +50,8 @@ class MasterData:
         :param collection_name:
         :return success or error message:
         """
+
+        # Checks if the collection is in the dictionary before removing.
         if collection_name in self.collection_dictionary:
             self.collection_dictionary.pop(collection_name)
             return collection_name.name + 'removed successfully.'
@@ -55,32 +60,38 @@ class MasterData:
 
     def auto_import(self, file):
         """
-        Method which will automatically import all the data from a csv.
-        :param file object:
-        :return:
+        Automatically creates collections out of each column and imports them
+        into the master dictionary
+        :param file: A file object
+        :return void:
         """
         new_collections = []
         reader = csv.reader(file, dialect='excel')
 
         # Corrects bug where "\ufeff" is included
         rows = [[c.replace('\ufeff', '') for c in row] for row in reader]
-
         rows = [r for r in rows]
 
+        # Creates collection objects out of headers.
         for i in rows[0]:
             new_collections.append(Collection(i))
 
+        # Creates a list which stores lists of the new data values.
         new_data = [list() for i in range(len(new_collections))]
 
+        # Reads in data to new_data var
         for i in range(1, len(rows)):
             for j in range(len(new_data)):
                 new_data[j].append(rows[i][j])
 
+        # Converts all data to floats
         new_data = [[float(j) for j in i] for i in new_data]
 
+        # Adds data to collections
         for i in range(len(new_collections)):
             new_collections[i].data = new_data[i]
 
+        # Adds the newly created collections to the dictionary
         for i in new_collections:
             self.add_collection(i)
 
@@ -152,15 +163,15 @@ class Collection:
         Method which prints the data of a collection.
         :return:
         """
+        self.round_all()
         return_string = ''
-        counter = 0
         for i in self.data:
-            return_string += i + ' '
-            counter += 1
-            if counter % 5 == 0:
-                return_string += '\n'
-
+            return_string += str(i) + '\n'
         return return_string
+
+    def round_all(self):
+        for i in range(len(self.data)):
+            self.data[i] = fn.round_sig(self.data[i], 4)
 
     def __add__(self, other):
         new_collection_data = []
@@ -235,6 +246,7 @@ class LinReg(CartPlot):
         self.usr_m = 0.0
         self.usr_b = 0.0
         self.MSE = 0.0
+        self.user_reg = False
 
     def __str__(self):
         return_string = ''
@@ -256,6 +268,9 @@ class LinReg(CartPlot):
     def upper_func(self, x):
         return (self.m + self.m_err) * x + (self.b + self.b_err)
 
+    def usr_func(self, x):
+        return self.usr_m * x + self.usr_b
+
     def round_all(self, f=4):
         # TODO Move round all to collection class for self.x and self.y
         self.x = [fn.round_sig(i, f) for i in self.x]
@@ -270,6 +285,7 @@ class LinReg(CartPlot):
         self.std_err = fn.round_sig(self.std_err, f)
 
     def default_plot(self, y=None):
+        """
         if y is None:
             y = self.y
         fig, my_plot = plt.subplots()
@@ -291,14 +307,42 @@ class LinReg(CartPlot):
         my_plot.set_xticks(np.arange(self.x[0], self.x[-1] + (self.x[-1] / 10), self.x[-1] / 10))
         my_plot.set_yticks(np.arange(y_min, y_max + (y_max / 10), y_max / 10))
         plt.show()
+        """
+
+        upper_y = [self.upper_func(i) for i in self.x]
+        lower_y = [self.lower_func(i) for i in self.x]
+        user_y = [self.usr_func(i) for i in self.x]
+        y = [self.func(i) for i in self.x]
+        fig, my_plot = plt.subplots()
+
+        y_max = max(max(self.y), max(user_y), max(upper_y), max(y))
+        y_min = min(min(self.y), min(user_y), min(lower_y), min(y))
+
+        original_data = my_plot.scatter(self.x, self.y, color='#3d405b', label='Original data')
+        regression = my_plot.plot(self.x, y, color='#e07a5f', label='Regression')
+
+        if (self.m != 0) and (self.b != 0):
+            lower = my_plot.plot(self.x, lower_y, ls=':', color='#e07a5f', label='Lower Bound')
+            upper = my_plot.plot(self.x, upper_y, ls=':', color='#e07a5f', label='Upper Bound')
+
+        if self.usr_reg == True:
+            expected = my_plot.plot(self.x, user_y, color='#81b29a', label='User defined regression')
+
+        # my_plot.legend(loc='outside lower center')
+        my_plot.set_title(self.name)
+        my_plot.grid()
+        my_plot.set_xlabel(self.x_axis_name)
+        my_plot.set_ylabel(self.y_axis_name)
+        my_plot.set_xticks(np.arange(self.x[0], self.x[-1] + (self.x[-1] / 10), self.x[-1] / 10))
+        my_plot.set_yticks(np.arange(y_min, y_max + (y_max / 10), (abs(y_max) + abs(y_min) / 10)))
+
+        plt.show()
 
     def usr_reg(self):
         print("y = mx+b")
-        self.usr_m = input("Input the expected m.\n")
-        self.usr_b = input("Input the expected b.\n")
-
-    def usr_func(self, x):
-        return self.m * x + self.b
+        self.usr_m = float(input("Input the expected m.\n"))
+        self.usr_b = float(input("Input the expected b.\n"))
+        self.user_reg = True
 
     def calc_reg(self):
         self.m, self.b, self.r, self.p, self.std_err = stats.linregress(self.x, self.y)
@@ -312,7 +356,6 @@ class LinReg(CartPlot):
                 sum([self.x[i] for i in range(self.n)]) ** 2)))
 
         self.round_all()
-        self.default_plot([self.func(i) for i in self.x])
         print(self)
 
     def MSE_to_usr_def(self):
@@ -328,8 +371,10 @@ class LinReg(CartPlot):
             up = self.upper_func(self.x[i])
             low = self.lower_func(self.x[i])
             curr_point = self.usr_func(self.x[i])
-            if not (low <= curr_point <= up):
+            if not ((low <= curr_point) and (curr_point <= up)):
                 self.MSE += (min(abs(curr_point - up), abs(curr_point - low))) ** 2
+
+        print("Mean Squared Error:", self.MSE)
 
 
 class ExpReg(LinReg):
@@ -389,7 +434,7 @@ class ExpReg(LinReg):
         if self.user_reg == True:
             expected = my_plot.plot(self.x, user_y, color='#81b29a', label='User defined regression')
 
-        #my_plot.legend(loc='outside lower center')
+        # my_plot.legend(loc='outside lower center')
         my_plot.set_title(self.name)
         my_plot.grid()
         my_plot.set_xlabel(self.x_axis_name)

@@ -67,8 +67,14 @@ def plotting_portal(my_data):
                     r = cl.LinReg(my_data.collection_dictionary[n1], my_data.collection_dictionary[n2])
                     r.calc_reg()
 
+                    choice = input("Would you like to input expected values for a regression?\n"
+                                   "For yes type 'yes'. For no type anything.\n")
 
+                    if choice == 'yes':
+                        r.usr_reg()
+                        r.MSE_to_usr_def()
 
+                    r.default_plot()
                 case 3:
                     print(my_data)
                     n1 = input("Enter the name of the independant variable collection.\n")
@@ -77,7 +83,7 @@ def plotting_portal(my_data):
                     expr.calc_reg()
 
                     choice = input("Would you like to input expected values for a regression?\n"
-                                   "For yes type 'yes'. For no type anything.")
+                                   "For yes type 'yes'. For no type anything.\n")
 
                     if choice == 'yes':
                         expr.usr_reg()
