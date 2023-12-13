@@ -285,29 +285,6 @@ class LinReg(CartPlot):
         self.std_err = fn.round_sig(self.std_err, f)
 
     def default_plot(self, y=None):
-        """
-        if y is None:
-            y = self.y
-        fig, my_plot = plt.subplots()
-
-        y_max = max(max(y), max(self.y))
-        y_min = min(min(y), min(self.y))
-
-        my_plot.scatter(self.x, self.y, color='#3d405b')
-        my_plot.plot(self.x, y, color='#e07a5f')
-
-        if (self.m != 0) and (self.b != 0):
-            my_plot.plot(self.x, [self.lower_func(i) for i in self.x], ls=':')
-            my_plot.plot(self.x, [self.upper_func(i) for i in self.x], ls=':')
-
-        my_plot.set_title(self.name)
-        my_plot.grid()
-        my_plot.set_xlabel(self.x_axis_name)
-        my_plot.set_ylabel(self.y_axis_name)
-        my_plot.set_xticks(np.arange(self.x[0], self.x[-1] + (self.x[-1] / 10), self.x[-1] / 10))
-        my_plot.set_yticks(np.arange(y_min, y_max + (y_max / 10), y_max / 10))
-        plt.show()
-        """
 
         upper_y = [self.upper_func(i) for i in self.x]
         lower_y = [self.lower_func(i) for i in self.x]
