@@ -222,7 +222,7 @@ class CartPlot:
         temp_collection = self.cl1
         self.cl1 = self.cl2
         self.cl2 = temp_collection
-        # TODO make it so that the class reconstructs with the new collections
+        self.__init__(self.cl1, self.cl2)
         print("Swapped the axis.")
 
 
