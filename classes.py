@@ -85,7 +85,19 @@ class MasterData:
                 new_data[j].append(rows[i][j])
 
         # Converts all data to floats
-        new_data = [[float(j) for j in i] for i in new_data]
+        new_new_data = []
+        for i in new_data:
+            inner_list = []
+            for j in i:
+                try:
+                    inner_list.append(float(j))
+                except ValueError:
+                    print("Non numeric value in row", j)
+                except Exception as v:
+                    print(v)
+            new_new_data.append(inner_list)
+        new_data = new_new_data
+
 
         # Adds data to collections
         for i in range(len(new_collections)):
