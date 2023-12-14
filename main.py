@@ -6,7 +6,6 @@ import functions as fn
 def main():
     my_data = cl.MasterData()
 
-    fn.read_from_file(my_data, f='data/sample_data_from_lab.csv')
     loop_break = False
     while not loop_break:
         try:
